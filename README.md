@@ -3,7 +3,8 @@
 
 ### Technology
 * Vue.js
-* d3.js
+* cheerio-httpcli
+* axios
 
 ### Ready
 ```
