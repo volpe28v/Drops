@@ -12,7 +12,7 @@
       <div class="leftpane">
         <div class="left-header">
           <form v-on:submit.prevent="search">
-            <input style="width: 210px" v-model="query">
+            <input style="width: 210px" v-model.lazy="query">
           </form>
           <button v-on:click="reload">reload</button> <span class="reload-msg" v-html="reloadMsg"></span>
 

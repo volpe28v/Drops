@@ -18,5 +18,5 @@ $ webpack
 
 ### Run
 ```
-$ node app.js
+$ node app.js -p 3000 -i 300 -r 100
 ```

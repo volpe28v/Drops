@@ -48,18 +48,20 @@ new Vue({
       });
     },
 
-    selectDetail: function(result){
-      var self = this;
-      var text = result.detailText;
-      var html = text.replace(/\r\n/g, '</br>');
-      self.detailText = html;
-    },
-
     dispDetail: function(detailText){
       var self = this;
       var text = detailText;
       text = text.replace(/^(\r\n)+/, '')
                  .replace(/\r\n/g, '</br>');
+
+      if (self.query != ""){
+        var queries = self.query.split(',');
+        queries.forEach(function(q){
+          var reg = new RegExp("(" + q + ")",'g');
+          text = text.replace(reg, '<font color="red">$1</font>');
+        });
+      }
+
       return text;
     },
 
@@ -73,6 +75,7 @@ new Vue({
         var updatedCount = response.data.updated;
         if (updatedCount > 0){
           self.reloadMsg = response.data.updated + "件更新されました";
+          self.search();
         }else{
           self.reloadMsg = "最新です";
         }
@@ -98,6 +101,5 @@ new Vue({
       }catch (err){
       }
     },
-
   }
 });
