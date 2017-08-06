@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>PredictionViewer</title>
+    <title>Drops</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
@@ -11,62 +11,25 @@
     <div id="app">
       <div class="leftpane">
         <div class="left-header">
-          <span v-html="targetDispDate"></span>
-          <div>
-            reload offset
-            <input style="width: 30px; text-align: right;" v-model="offsetSeconds">sec
-          </div>
-        </div>
+          <form v-on:submit.prevent="search">
+            <input style="width: 210px" v-model="query">
+          </form>
+          <button v-on:click="reload">reload</button> <span class="reload-msg" v-html="reloadMsg"></span>
 
-        <div class="left-body">
-          <div class="add-form">
-            <input style="width: 210px" v-model="baseUrl">
-            <table>
-              <tr>
-                <td>projectID</td>
-                <td><input style="width: 30px; text-align: right;"  v-model="projectID"></td>
-              </tr>
-              <tr>
-                <td>stationID</td>
-                <td><input style="width: 30px; text-align: right;"  v-model="stationID"></td>
-              </tr>
-              <tr>
-                <td>delay</td>
-                <td><input style="width: 30px; text-align: right;"  v-model="delay">min</td>
-              </tr>
-            </table>
-            <button style="width: 100%" v-on:click="addPrediction">Add</button>
-          </div>
-
-          <ul class="history">
-            <li v-for="history in predictionsHistory" v-on:click="selectHistory(history)">
-              <div>{{history.baseUrl}}</div>
-              <div>
-                P:{{history.projectID}} S:{{history.stationID}} D:{{history.delay}}
-              </div>
-            </li>
-          </ul>
+          <div v-html="dispCount"></div>
         </div>
       </div>
 
       <div class="rightpane">
-        <prediction class="prediction"
-                    v-for="(prediction, index) in predictions"
-                    :key="index"
-                    :index="index"
-                    :prediction="prediction"
-                    :base_url="prediction.baseUrl"
-                    :project_id="prediction.projectID"
-                    :station_id="prediction.stationID"
-                    :delay="prediction.delay"
-                    :target_date="adjustedDate"
-                    v-on:delete-prediction="deletePrediction"
-                    >
-        </prediction>
+        <div v-if="results.length > 0">
+          <div class="detail" v-for="result in results" v-html="dispDetail(result.detailText)"></div>
+        </div>
+        <div v-else>
+          検索結果なし
+        </div>
       </div>
     </div>
 
-    <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="https://unpkg.com/vue"></script>
     <script type="text/javascript" src="dist/bundle.js">
     </script>

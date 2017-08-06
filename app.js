@@ -12,42 +12,62 @@ app.use(bodyParser.json());
 var program = require('commander');
 program
   .version('1.0.0')
+  .option('-i, --init <n>', 'initial count. default is 300.')
+  .option('-r, --reload <n>', 'reload count. default is 100.')
   .option('-p, --port <n>', 'port no. default is 3000.')
   .parse(process.argv);
 
 app.set('port', program.port || process.env.PORT || 3000);
+app.set('init', program.init || process.env.INIT || 300);
+app.set('reload', program.reload || process.env.RELOAD || 100);
 
-app.get('/', function (req, res) {
-  var options = { root: path.join(__dirname, '') };
-  res.sendFile('index.html', options);
+var Drop = require("./lib/drop");
+var alertList = [];
+Drop.getList(app.get('init'))
+.then(function(result){
+  alertList = result;
+
+  startServer();
 });
 
-app.post('*', function (req, res){
-  console.log(req.url);
-  console.log(req.body);
-
-  if (req.body.baseUrl == null || req.body.baseUrl == ''){ res.send("bad baseUrl"); return; }
-  if (!isFinite(parseInt(req.body.projectID))) { res.send("bad projectID"); return; }
-  if (!isFinite(parseInt(req.body.stationID))) { res.send("bad stationID"); return; }
-
-  var baseUrl = req.body.baseUrl;
-  if (baseUrl.slice(-1) != '/') { baseUrl = baseUrl + '/'; }
-  baseUrl = baseUrl + "api/values/";
-
-  var targetMethod = req.url.split("/").pop();
-  var options = {
-    uri: baseUrl + targetMethod,
-    form: req.body,
-    json: true
-  };
-
-  request.post(options, function(error, response, body){
-    console.log(body);
-    res.send(body);
+function startServer(){
+  app.get('/', function (req, res) {
+    var options = { root: path.join(__dirname, '') };
+    res.sendFile('index.html', options);
   });
-});
 
+  app.post('/search', function (req, res){
+    console.log(req.url);
+    console.log(req.body);
+    var query = req.body.query;
+    var queries = query.split(',');
 
-app.listen(app.get('port'), function () {
-  console.log('PredictionViewr listening on port ' + app.get('port'));
-});
+    if (query == ""){
+      res.send(alertList);
+    }else{
+      var hitList = alertList.filter(function(al){
+        var found = false;
+        queries.forEach(function(q){
+          if (~al.detailText.indexOf(q)){
+            found = true;
+          }
+        });
+        return found;
+      });
+      res.send(hitList);
+    }
+  });
+
+  app.get('/reload', function (req, res){
+    console.log(req.url);
+    Drop.getUpdatedList(alertList, app.get('reload'))
+    .then(function(updatedList){
+      alertList = updatedList.concat(alertList);
+      res.send({ updated: updatedList.length });
+    });
+  });
+
+  app.listen(app.get('port'), function () {
+    console.log('Drops listening on port ' + app.get('port'));
+  });
+}

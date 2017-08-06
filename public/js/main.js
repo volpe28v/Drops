@@ -1,101 +1,101 @@
 // vue vm
-var prediction = require("./prediction");
 var moment = require("moment");
 moment.locale('ja');
+
+var axios = require("axios");
 
 new Vue({
   el: '#app',
   data: {
-    baseUrl: "http://winmuse.cloudapp.net/damapp/",
-    projectID: 100,
-    stationID: 94,
-    delay: 20,
-    predictions: [],
-    predictionsHistory: [],
-    offsetSeconds: 70,
-    targetDate: moment(),
+    query: "",
+    results: [],
+    detailText: "",
+    reloadMsg: "",
   },
 
   computed: {
-    targetDispDate: function(){
-      return this.targetDate.format('YYYY:MM:DD HH:mm:ss');
-    },
-    adjustedDate: function(){
-      return this.targetDate.add(this.offsetSeconds * -1, 'second');
+    dispCount: function(){
+      return this.results.length + "件";
     }
   },
 
   mounted: function(){
     var self = this;
-
-    this.predictionsHistory = this.getHistoryFromLocalstorage();
-    setInterval(function(){
-      self.targetDate = moment();
-    }, 1000);
+    self.query = self.getQueryLocalstorage();
+    self.search();
   },
 
   methods: {
-    addPrediction: function(){
-      var prediction = {
-        baseUrl: this.baseUrl,
-        projectID: this.projectID,
-        stationID: this.stationID,
-        delay: this.delay
-      };
+    search: function(){
+      var self = this;
+      console.log(self.query);
 
-      this.addPredictionList(prediction);
-      this.addHistory(prediction);
-    },
+      self.setQueryToLocalStorage(self.query);
 
-    addPredictionList: function(prediction){
-      if (!this.containsPrediction(this.predictions, prediction)){
-        this.predictions.push(prediction);
-      }
-    },
+      axios.post('/search', {
+        query: self.query,
+      })
+      .then(function (response) {
+        console.log(response);
+        self.results = response.data;
 
-    addHistory: function(history){
-      if (!this.containsPrediction(this.predictionsHistory, history)){
-        this.predictionsHistory.unshift(history);
-      }
-
-      this.setHistoryToLocalStorage(this.predictionsHistory);
-    },
-
-    containsPrediction: function(list, target){
-      return list.filter(function(p){
-        return p.baseUrl == target.baseUrl &&
-               p.projectID == target.projectID &&
-               p.stationID == target.stationID &&
-               p.delay == target.delay;
-      }).length != 0;
-    },
-
-    selectHistory: function(history){
-      this.addPredictionList(history);
-    },
-
-    getHistoryFromLocalstorage: function(){
-      try{
-        if (localStorage && localStorage.history){
-          return JSON.parse(localStorage.history);
+        if (self.results.length > 0){
+          self.selectDetail(self.results[0]);
         }
-        return [];
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    },
+
+    selectDetail: function(result){
+      var self = this;
+      var text = result.detailText;
+      var html = text.replace(/\r\n/g, '</br>');
+      self.detailText = html;
+    },
+
+    dispDetail: function(detailText){
+      var self = this;
+      var text = detailText;
+      text = text.replace(/^(\r\n)+/, '')
+                 .replace(/\r\n/g, '</br>');
+      return text;
+    },
+
+    reload: function(){
+      var self = this;
+      axios.get('/reload')
+      .then(function(response){
+        console.log(response);
+        var updatedCount = response.data.updated;
+        if (updatedCount > 0){
+          self.reloadMsg = response.data.updated + "件更新されました";
+        }else{
+          self.reloadMsg = "最新です";
+        }
+      });
+    },
+
+    getQueryLocalstorage: function(){
+      try{
+        if (localStorage && localStorage.query){
+          return localStorage.query;
+        }
+        return "";
       }catch (err){
-        return [];
+        return "";
       }
     },
-    setHistoryToLocalStorage: function(history){
+
+    setQueryToLocalStorage: function(query){
       try{
         if (localStorage){
-          localStorage.history = JSON.stringify(history);
+          localStorage.query = query;
         }
       }catch (err){
       }
     },
 
-    deletePrediction: function(target){
-      var index = this.predictions.indexOf(target);
-      this.predictions.splice(index,1);
-    },
   }
 });
