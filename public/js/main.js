@@ -65,6 +65,8 @@ new Vue({
 
     reload: function(){
       var self = this;
+      self.reloadMsg = "リロード中...";
+
       axios.get('/reload')
       .then(function(response){
         console.log(response);

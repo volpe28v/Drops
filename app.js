@@ -62,8 +62,10 @@ function startServer(){
     console.log(req.url);
     Drop.getUpdatedList(alertList, app.get('reload'))
     .then(function(updatedList){
+      var addCount = updatedList.length;
       alertList = updatedList.concat(alertList);
-      res.send({ updated: updatedList.length });
+      alertList.splice(alertList.length - addCount, addCount);
+      res.send({ updated: addCount });
     });
   });
 
