@@ -38,10 +38,6 @@ new Vue({
       .then(function (response) {
         console.log(response);
         self.results = response.data;
-
-        if (self.results.length > 0){
-          self.selectDetail(self.results[0]);
-        }
       })
       .catch(function (error) {
         console.log(error);
@@ -52,12 +48,14 @@ new Vue({
       var self = this;
       var text = detailText;
       text = text.replace(/^(\r\n)+/, '')
-                 .replace(/\r\n/g, '</br>');
+                 .replace('<img alt="Compiled by FRICS" src="/pcstatic/image/company_logo_ip.png">','');
 
       if (self.query != ""){
         var queries = self.query.split(',');
         queries.forEach(function(q){
-          var reg = new RegExp("(" + q + ")",'g');
+          var trimedQuery = q.trim();
+          if (trimedQuery == ""){ return; }
+          var reg = new RegExp("(" + trimedQuery + ")",'g');
           text = text.replace(reg, '<font color="red">$1</font>');
         });
       }
@@ -67,7 +65,7 @@ new Vue({
 
     reload: function(){
       var self = this;
-      self.reloadMsg = "リロード中...";
+      self.reloadMsg = "クロール中...";
 
       axios.get('/reload')
       .then(function(response){

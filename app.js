@@ -48,7 +48,9 @@ function startServer(){
       var hitList = alertList.filter(function(al){
         var found = false;
         queries.forEach(function(q){
-          if (~al.detailText.indexOf(q)){
+          var trimedQuery = q.trim();
+          if (trimedQuery == ""){ return;}
+          if (~al.detailText.indexOf(trimedQuery)){
             found = true;
           }
         });

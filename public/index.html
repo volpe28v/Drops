@@ -11,10 +11,9 @@
     <div id="app">
       <div class="leftpane">
         <div class="left-header">
-          <form v-on:submit.prevent="search">
-            <input style="width: 290px" v-model.lazy="query">
-          </form>
-          <button v-on:click="reload">reload</button> <span class="reload-msg" v-html="reloadMsg"></span>
+          <textarea style="width: 100%; height: 100px" v-model.lazy="query"></textarea>
+          <button v-on:click="search">search</button>
+          <button v-on:click="reload">crawl</button> <span class="reload-msg" v-html="reloadMsg"></span>
 
           <div v-html="dispCount"></div>
         </div>
