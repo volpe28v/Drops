@@ -57,7 +57,7 @@ new Vue({
           var trimedQuery = q.trim();
           if (trimedQuery == ""){ return; }
           var reg = new RegExp("(" + trimedQuery + ")",'g');
-          text = text.replace(reg, '<font color="red">$1</font>');
+          text = text.replace(reg, '<font color="lime">$1</font>');
         });
       }
 
