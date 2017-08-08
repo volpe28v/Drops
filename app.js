@@ -4,6 +4,7 @@ var request = require('request');
 var app = express();
 var path = require('path');
 var program = require('commander');
+var moment = require('moment');
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({extended: true}));
@@ -23,9 +24,12 @@ app.set('reload', program.reload || process.env.RELOAD || 100);
 
 var Drop = require("./lib/drop");
 var alertList = [];
+var latestCrawlDate = null;
+
 Drop.getList(app.get('init'))
 .then(function(result){
   alertList = result;
+  latestCrawlDate = moment();
 
   startServer();
 });
@@ -42,32 +46,36 @@ function startServer(){
     var query = req.body.query;
     var queries = query.split(',');
 
-    if (query == ""){
-      res.send(alertList);
-    }else{
-      var hitList = alertList.filter(function(al){
-        var found = false;
-        queries.forEach(function(q){
-          var trimedQuery = q.trim();
-          if (trimedQuery == ""){ return;}
-          if (~al.detailText.indexOf(trimedQuery)){
-            found = true;
-          }
-        });
-        return found;
+    var hitList = alertList.filter(function(al){
+      var found = false;
+      queries.forEach(function(q){
+        var trimedQuery = q.trim();
+        if (trimedQuery == ""){ return;}
+        if (~al.detailText.indexOf(trimedQuery)){
+          found = true;
+        }
       });
-      res.send(hitList);
-    }
+      return found;
+    });
+    res.send({
+      latestCrawlDate: latestCrawlDate.format('YYYY/MM/DD HH:mm'),
+      list: hitList
+    });
   });
 
   app.get('/reload', function (req, res){
     console.log(req.url);
     Drop.getUpdatedList(alertList, app.get('reload'))
     .then(function(updatedList){
+      latestCrawlDate = moment();
+
       var addCount = updatedList.length;
       alertList = updatedList.concat(alertList);
       alertList.splice(alertList.length - addCount, addCount);
-      res.send({ updated: addCount });
+      res.send({
+        latestCrawlDate: latestCrawlDate.format('YYYY/MM/DD HH:mm'),
+        updated: addCount 
+      });
     });
   });
 

@@ -59,7 +59,7 @@ html,body {
   text-decoration: none;
 }
 
-.reload-msg {
+.latest-crawl-date, .reload-msg {
   font-size: 12px;
 }
 

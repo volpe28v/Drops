@@ -11,6 +11,7 @@ new Vue({
     results: [],
     detailText: "",
     reloadMsg: "",
+    latestCrawlDate: "",
   },
 
   computed: {
@@ -28,7 +29,6 @@ new Vue({
   methods: {
     search: function(){
       var self = this;
-      console.log(self.query);
 
       self.setQueryToLocalStorage(self.query);
 
@@ -37,7 +37,8 @@ new Vue({
       })
       .then(function (response) {
         console.log(response);
-        self.results = response.data;
+        self.results = response.data.list;
+        self.latestCrawlDate = response.data.latestCrawlDate;
       })
       .catch(function (error) {
         console.log(error);
@@ -77,6 +78,8 @@ new Vue({
         }else{
           self.reloadMsg = "最新です";
         }
+
+        self.latestCrawlDate = response.data.latestCrawlDate;
       });
     },
 
