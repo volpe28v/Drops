@@ -9,7 +9,8 @@
     "cheerio-httpcli": "^0.7.0",
     "commander": "^2.11.0",
     "express": "^4.15.3",
-    "moment": "^2.18.1"
+    "moment": "^2.18.1",
+    "mongodb": "^2.2.30"
   },
   "devDependencies": {
     "webpack": "^2.2.1"
