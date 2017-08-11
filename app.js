@@ -28,8 +28,6 @@ var Drop = require("./lib/drop");
 var mongo_builder = require('./lib/mongo_builder');
 var drop_db = require("./lib/drops_db");
 
-var latestCrawlDate = moment();
-
 Promise.all([
   mongo_builder.ready(app.get('db_name'))
 ])
@@ -48,23 +46,26 @@ function startServer(){
     console.log(req.url);
 
     var addCount = 0;
+    var latestCrawlDate = moment();
     Promise.resolve()
-    .then(function(result){
-      return Drop.getUpdatedList([], app.get('init'));
-    })
-    .then(function(result){
-      var updatedList = result;
-      latestCrawlDate = moment();
+      .then(function(result){
+        return Drop.getUpdatedList([], app.get('init'));
+      })
+      .then(function(result){
+        var updatedList = result;
 
-      addCount = updatedList.length;
-      return drop_db.save({data: updatedList});
-    })
-    .then(function(){
-      res.send({
-        latestCrawlDate: latestCrawlDate.format('YYYY/MM/DD HH:mm'),
-        updated: addCount 
+        addCount = updatedList.length;
+        return drop_db.save({
+          data: updatedList,
+          latestDate: latestCrawlDate.toDate()
+        });
+      })
+      .then(function(){
+        res.send({
+          latestCrawlDate: latestCrawlDate.format('YYYY/MM/DD HH:mm'),
+          updated: addCount 
+        });
       });
-    });
   });
 
   app.post('/search', function (req, res){
@@ -74,34 +75,36 @@ function startServer(){
     var queries = query.split(',');
 
     Promise.resolve()
-    .then(function(){
-      return drop_db.get();
-    })
-    .then(function(result){
-      var alertList = result != null ? result.data : [];
+      .then(function(){
+        return drop_db.get();
+      })
+      .then(function(result){
+        var alertList = result != null ? result.data : [];
+        var latestCrawlDate = result != null ? moment(result.latestDate): moment();
+        console.log(result.latestDate);
 
-      var hitList = [];
-      if (queries.length == 1 && queries[0] == ""){
-        hitList = alertList;
-      }else{
-        hitList = alertList.filter(function(al){
-          var found = false;
-          queries.forEach(function(q){
-            var trimedQuery = q.trim();
-            if (trimedQuery == ""){ return;}
-            if (~al.detailText.indexOf(trimedQuery)){
-              found = true;
-            }
+        var hitList = [];
+        if (queries.length == 1 && queries[0] == ""){
+          hitList = alertList;
+        }else{
+          hitList = alertList.filter(function(al){
+            var found = false;
+            queries.forEach(function(q){
+              var trimedQuery = q.trim();
+              if (trimedQuery == ""){ return;}
+              if (~al.detailText.indexOf(trimedQuery)){
+                found = true;
+              }
+            });
+            return found;
           });
-          return found;
-        });
-      }
+        }
 
-      res.send({
-        latestCrawlDate: latestCrawlDate.format('YYYY/MM/DD HH:mm'),
-        list: hitList
+        res.send({
+          latestCrawlDate: latestCrawlDate.format('YYYY/MM/DD HH:mm'),
+          list: hitList
+        });
       });
-    });
   });
 
   app.get('/reload', function (req, res){
@@ -109,33 +112,36 @@ function startServer(){
 
     var addCount = 0;
     var alertList = null;
-
+    var latestCrawlDate = moment();
     Promise.resolve()
-    .then(function(){
-      return drop_db.get();
-    })
-    .then(function(result){
-      alertList = result != null ? result.data : [];
-      return Drop.getUpdatedList(alertList, app.get('reload'));
-    })
-    .then(function(result){
-      var updatedList = result;
-      latestCrawlDate = moment();
+      .then(function(){
+        return drop_db.get();
+      })
+      .then(function(result){
+        alertList = result != null ? result.data : [];
+        return Drop.getUpdatedList(alertList, app.get('reload'));
+      })
+      .then(function(result){
+        var updatedList = result;
+        latestCrawlDate = moment();
 
-      addCount = updatedList.length;
-      alertList = updatedList.concat(alertList);
-      if (alertList.length > app.get('init')){
-        alertList.splice(alertList.length - addCount, addCount);
-      }
+        addCount = updatedList.length;
+        alertList = updatedList.concat(alertList);
+        if (alertList.length > app.get('init')){
+          alertList.splice(alertList.length - addCount, addCount);
+        }
 
-      return drop_db.save({data: alertList});
-    })
-    .then(function(){
-      res.send({
-        latestCrawlDate: latestCrawlDate.format('YYYY/MM/DD HH:mm'),
-        updated: addCount 
+        return drop_db.save({
+          data: alertList,
+          latestDate: latestCrawlDate.toDate()
+        });
+      })
+      .then(function(){
+        res.send({
+          latestCrawlDate: latestCrawlDate.format('YYYY/MM/DD HH:mm'),
+          updated: addCount 
+        });
       });
-    });
   });
 
   app.listen(app.get('port'), function () {
