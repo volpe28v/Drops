@@ -47,6 +47,7 @@ function startServer(){
 
     var addCount = 0;
     var latestCrawlDate = moment();
+    var latestDataDate = "";
     Promise.resolve()
       .then(function(result){
         return Drop.getUpdatedList([], app.get('init'));
@@ -55,6 +56,9 @@ function startServer(){
         var updatedList = result;
 
         addCount = updatedList.length;
+        if (addCount > 0){
+          latestDataDate = updatedList[0].date;
+        }
         return drop_db.save({
           data: updatedList,
           latestDate: latestCrawlDate.toDate()
@@ -63,6 +67,7 @@ function startServer(){
       .then(function(){
         res.send({
           latestCrawlDate: latestCrawlDate.format('YYYY/MM/DD HH:mm'),
+          latestDataDate: latestDataDate,
           updated: addCount 
         });
       });
@@ -81,6 +86,7 @@ function startServer(){
       .then(function(result){
         var alertList = result != null ? result.data : [];
         var latestCrawlDate = result != null ? moment(result.latestDate): moment();
+        var latestDataDate = result != null ? (result.data.length > 0 ? result.data[0].date : "") : "";
         console.log(result.latestDate);
 
         var hitList = [];
@@ -102,6 +108,7 @@ function startServer(){
 
         res.send({
           latestCrawlDate: latestCrawlDate.format('YYYY/MM/DD HH:mm'),
+          latestDataDate: latestDataDate,
           list: hitList
         });
       });
@@ -113,12 +120,17 @@ function startServer(){
     var addCount = 0;
     var alertList = null;
     var latestCrawlDate = moment();
+    var latestDataDate = "";
     Promise.resolve()
       .then(function(){
         return drop_db.get();
       })
       .then(function(result){
         alertList = result != null ? result.data : [];
+        if (alertList.length> 0){
+          latestDataDate = alertList[0].date;
+        }
+
         return Drop.getUpdatedList(alertList, app.get('reload'));
       })
       .then(function(result){
@@ -126,6 +138,10 @@ function startServer(){
         latestCrawlDate = moment();
 
         addCount = updatedList.length;
+        if (addCount > 0){
+          latestDataDate = updatedList[0].date;
+        }
+
         alertList = updatedList.concat(alertList);
         if (alertList.length > app.get('init')){
           alertList.splice(alertList.length - addCount, addCount);
@@ -133,12 +149,14 @@ function startServer(){
 
         return drop_db.save({
           data: alertList,
-          latestDate: latestCrawlDate.toDate()
+          latestDate: latestCrawlDate.toDate(),
+          latestDataDate: latestDataDate,
         });
       })
       .then(function(){
         res.send({
           latestCrawlDate: latestCrawlDate.format('YYYY/MM/DD HH:mm'),
+          latestDataDate: latestDataDate,
           updated: addCount 
         });
       });

@@ -12,6 +12,7 @@ new Vue({
     detailText: "",
     reloadMsg: "",
     latestCrawlDate: "",
+    latestDataDate: "",
   },
 
   computed: {
@@ -39,6 +40,7 @@ new Vue({
         console.log(response);
         self.results = response.data.list;
         self.latestCrawlDate = response.data.latestCrawlDate;
+        self.latestDataDate = response.data.latestDataDate;
       })
       .catch(function (error) {
         console.log(error);
@@ -80,6 +82,7 @@ new Vue({
         }
 
         self.latestCrawlDate = response.data.latestCrawlDate;
+        self.latestDataDate = response.data.latestDataDate;
       });
     },
 

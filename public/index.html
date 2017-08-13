@@ -18,14 +18,20 @@
           <div class="latest-crawl-date">
             最終クロール日時: <span v-html="latestCrawlDate"></span>
           </div>
+          <div class="latest-crawl-date">
+            最新データ日時: <span v-html="latestDataDate"></span>
+          </div>
+
           <div v-html="dispCount"></div>
+
+          <a target="_blank" class="detail-url" href="http://www.river.go.jp/kawabou/ipInfoList.do?gamenId=01-1301&fvrt=yes">url</a>
         </div>
       </div>
 
       <div class="rightpane">
         <div v-if="results.length > 0">
           <div class="detail" v-for="result in results">
-            <a class="detail-url" target="_blank" :href="result.detailUrl">URL</a>
+            <a class="detail-url" target="_blank" :href="result.detailUrl">url</a>
             <div v-html="dispDetail(result.detailText)"></div>
           </div>
         </div>
