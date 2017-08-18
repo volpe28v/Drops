@@ -117,50 +117,75 @@ function startServer(){
   app.get('/reload', function (req, res){
     console.log(req.url);
 
+    Promise.resolve()
+      .then(function(){
+        return reloadInfo();
+      })
+      .then(function(result){
+        res.send({
+          latestCrawlDate: result.latestCrawlDate,
+          latestDataDate: result.latestDataDate,
+          updated: result.addCount 
+        });
+      });
+  });
+
+  app.get('/silent_reload', function (req, res){
+    console.log(req.url);
+
+    res.send("reload started");
+    reloadInfo();
+  });
+
+
+  function reloadInfo(){
     var addCount = 0;
     var alertList = null;
     var latestCrawlDate = moment();
     var latestDataDate = "";
-    Promise.resolve()
-      .then(function(){
-        return drop_db.get();
-      })
-      .then(function(result){
-        alertList = result != null ? result.data : [];
-        if (alertList.length> 0){
-          latestDataDate = alertList[0].date;
-        }
 
-        return Drop.getUpdatedList(alertList, app.get('reload'));
-      })
-      .then(function(result){
-        var updatedList = result;
-        latestCrawlDate = moment();
+    return new Promise(function(resolve,reject){
+      Promise.resolve()
+        .then(function(){
+          return drop_db.get();
+        })
+        .then(function(result){
+          alertList = result != null ? result.data : [];
+          if (alertList.length> 0){
+            latestDataDate = alertList[0].date;
+          }
 
-        addCount = updatedList.length;
-        if (addCount > 0){
-          latestDataDate = updatedList[0].date;
-        }
+          return Drop.getUpdatedList(alertList, app.get('reload'));
+        })
+        .then(function(result){
+          var updatedList = result;
+          latestCrawlDate = moment();
 
-        alertList = updatedList.concat(alertList);
-        if (alertList.length > app.get('init')){
-          alertList.splice(alertList.length - addCount, addCount);
-        }
+          addCount = updatedList.length;
+          if (addCount > 0){
+            latestDataDate = updatedList[0].date;
+          }
 
-        return drop_db.save({
-          data: alertList,
-          latestDate: latestCrawlDate.toDate(),
-          latestDataDate: latestDataDate,
+          alertList = updatedList.concat(alertList);
+          if (alertList.length > app.get('init')){
+            alertList.splice(alertList.length - addCount, addCount);
+          }
+
+          return drop_db.save({
+            data: alertList,
+            latestDate: latestCrawlDate.toDate(),
+            latestDataDate: latestDataDate,
+          });
+        })
+        .then(function(){
+          resolve({
+            latestCrawlDate: latestCrawlDate.format('YYYY/MM/DD HH:mm'),
+            latestDataDate: latestDataDate,
+            updated: addCount 
+          });
         });
-      })
-      .then(function(){
-        res.send({
-          latestCrawlDate: latestCrawlDate.format('YYYY/MM/DD HH:mm'),
-          latestDataDate: latestDataDate,
-          updated: addCount 
-        });
-      });
-  });
+    });
+  }
 
   app.listen(app.get('port'), function () {
     console.log('Drops listening on port ' + app.get('port'));

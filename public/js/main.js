@@ -13,6 +13,7 @@ new Vue({
     reloadMsg: "",
     latestCrawlDate: "",
     latestDataDate: "",
+    enabledNotify: true,
   },
 
   computed: {
@@ -21,29 +22,55 @@ new Vue({
     }
   },
 
+  watch: {
+    enabledNotify: function(val){
+      this.requestNotification();
+    }
+  },
+
   mounted: function(){
     var self = this;
+    self.requestNotification();
+
     self.query = self.getQueryLocalstorage();
     self.search();
+
+    setInterval(function(){
+      var latestSearchedDate = self.results.length > 0 ? self.results[0].date : null;
+
+      self.silent_reload();
+      self.search()
+      .then(function(){
+        var newestSearchedDate = self.results.length > 0 ? self.results[0].date : null;
+
+        if (latestSearchedDate != newestSearchedDate){
+          // 検索結果に最新あり。通知する
+          self.doNotification();
+        }
+
+      });
+
+    }, 30 * 60 * 1000);
   },
 
   methods: {
     search: function(){
       var self = this;
 
-      self.setQueryToLocalStorage(self.query);
+      return new Promise(function(resolve, reject){
+        self.setQueryToLocalStorage(self.query);
 
-      axios.post('/search', {
-        query: self.query,
-      })
-      .then(function (response) {
-        console.log(response);
-        self.results = response.data.list;
-        self.latestCrawlDate = response.data.latestCrawlDate;
-        self.latestDataDate = response.data.latestDataDate;
-      })
-      .catch(function (error) {
-        console.log(error);
+        axios.post('/search', { query: self.query })
+          .then(function (response) {
+            console.log(response);
+            self.results = response.data.list;
+            self.latestCrawlDate = response.data.latestCrawlDate;
+            self.latestDataDate = response.data.latestDataDate;
+            resolve();
+          })
+          .catch(function (error) {
+            reject();
+          });
       });
     },
 
@@ -86,6 +113,16 @@ new Vue({
       });
     },
 
+    silent_reload: function(){
+      var self = this;
+
+      axios.get('/silent_reload')
+      .then(function(response){
+        console.log(response);
+      });
+    },
+
+
     getQueryLocalstorage: function(){
       try{
         if (localStorage && localStorage.query){
@@ -105,5 +142,28 @@ new Vue({
       }catch (err){
       }
     },
+
+    requestNotification: function(){
+      var self = this;
+      if (!self.enabledNotify){ return; }
+
+      if(Notification){
+        Notification.requestPermission();
+      }
+    },
+
+    doNotification: function(){
+      if (!self.enabledNotify){ return; }
+
+      var notif_title = "Drops";
+      var notif_msg = "川の防災情報に検索対象の警報が追加されました!";
+
+      var notification = new Notification(notif_title, {
+        body: notif_msg
+      });
+      setTimeout(function(){
+        notification.close();
+      }, 10 * 1000);
+    }
   }
 });
