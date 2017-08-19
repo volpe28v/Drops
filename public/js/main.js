@@ -78,7 +78,9 @@ new Vue({
       var self = this;
       var text = detailText;
       text = text.replace(/^(\r\n)+/, '')
-                 .replace('<img alt="Compiled by FRICS" src="/pcstatic/image/company_logo_ip.png">','');
+                 .replace('<img alt="Compiled by FRICS" src="/pcstatic/image/company_logo_ip.png">','')
+                 .replace(/style="width:987px;"/g,'')
+                 .replace(/nowrap/g,'');
 
       if (self.query != ""){
         var queries = self.query.split(',');
