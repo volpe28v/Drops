@@ -69,5 +69,22 @@ new Vue({
       });
     },
  
+    test: function(){
+      var self = this;
+
+      return new Promise(function(resolve, reject){
+        axios.post('/testWebhook', {
+          query: self.query,
+          url: self.webhookUrl
+        })
+          .then(function (response) {
+            console.log(response);
+            resolve();
+          })
+          .catch(function (error) {
+            reject();
+          });
+      });
+    },
   }
 });

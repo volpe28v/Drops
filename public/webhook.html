@@ -13,7 +13,11 @@
         <div class="left-header">
           <textarea style="width: 100%; height: 100px" v-model.lazy="query"></textarea>
           <input style="width: 210px" v-model="webhookUrl">
-          <button v-on:click="save">save</button>
+
+          <div>
+            <button v-on:click="save">save</button>
+            <button v-on:click="test">test</button>
+          </div>
         </div>
       </div>
     </div>

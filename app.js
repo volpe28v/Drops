@@ -142,6 +142,29 @@ function startServer(){
     });
   }),
 
+  app.post('/testWebhook', function(req, res){
+    console.log(req.body);
+    
+    var url = req.body.url;
+    var query = req.body.query;
+    var options = {
+      uri: url,
+      form: {query: "*** テスト*** " + query},
+      json: true
+    };
+
+    request.post(options, function(error, response, body){
+      if (!error && response.statusCode == 200) {
+        console.log("post webhook ok");
+        res.send({ result: "ok"});
+      } else {
+        console.log('post webhook error');
+        res.send({ result: "error"});
+      }
+    });
+  }),
+
+
   app.listen(app.get('port'), function () {
     console.log('Drops listening on port ' + app.get('port'));
   });
