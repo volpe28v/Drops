@@ -4,12 +4,13 @@ module.exports = {
   context: __dirname + '/public/js',
 
   entry: {
-    js: "./main.js"
+    main: "./main.js",
+    webhook: "./webhook.js"
   },
 
   output: {
     path: __dirname + '/public/dist',
-    filename: "./bundle.js"
+    filename: "./[name].bundle.js"
   },
 
 	plugins: [

@@ -38,7 +38,7 @@ new Vue({
     setInterval(function(){
       var latestSearchedDate = self.results.length > 0 ? self.results[0].date : null;
 
-      self.silent_reload();
+      //self.silent_reload();
       self.search()
       .then(function(){
         var newestSearchedDate = self.results.length > 0 ? self.results[0].date : null;
