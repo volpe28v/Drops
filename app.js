@@ -17,6 +17,7 @@ program
   .option('-i, --init <n>', 'initial count. default is 300.')
   .option('-r, --reload <n>', 'reload count. default is 100.')
   .option('-d, --db_name [name]', 'db name. default is "drops_db".')
+  .option('-h, --host [name]', 'host name. default is "http://localhost".')
   .option('-p, --port <n>', 'port no. default is 3000.')
   .parse(process.argv);
 
@@ -24,6 +25,7 @@ app.set('port', program.port || process.env.PORT || 3000);
 app.set('init', program.init || process.env.INIT || 300);
 app.set('reload', program.reload || process.env.RELOAD || 100);
 app.set('db_name', program.db_name || 'drops_db');
+app.set('host', program.host || 'http://localhost');
 
 var Drop = require("./lib/drop");
 var mongo_builder = require('./lib/mongo_builder');
@@ -149,7 +151,10 @@ function startServer(){
     var query = req.body.query;
     var options = {
       uri: url,
-      form: {query: "*** テスト*** " + query},
+      form: {
+        host: app.get('host') + ":" + app.get('port'),
+        query: "ThisIsTest," + query
+      },
       json: true
     };
 
@@ -258,7 +263,10 @@ function startCron(){
 
             var options = {
               uri: url,
-              form: {query: query},
+              form: {
+                host: app.get('host') + ":" + app.get('port'),
+                query: query
+              },
               json: true
             };
 

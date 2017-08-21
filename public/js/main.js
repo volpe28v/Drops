@@ -4,7 +4,13 @@ moment.locale('ja');
 
 var axios = require("axios");
 
+var router = new VueRouter({
+  mode: 'history',
+  routes: []
+});
+
 new Vue({
+  router: router,
   el: '#app',
   data: {
     query: "",
@@ -32,7 +38,12 @@ new Vue({
     var self = this;
     self.requestNotification();
 
-    self.query = self.getQueryLocalstorage();
+    var url_query = this.$route.query.key;
+    if (url_query != null){
+      self.query = url_query;
+    }else{
+      self.query = self.getQueryLocalstorage();
+    }
     self.search();
 
     setInterval(function(){
@@ -47,7 +58,6 @@ new Vue({
           // 検索結果に最新あり。通知する
           self.doNotification();
         }
-
       });
 
     }, 30 * 60 * 1000);
