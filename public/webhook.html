@@ -20,6 +20,22 @@
           </div>
         </div>
       </div>
+
+      <div class="rightpane">
+        <div v-if="logs.length > 0">
+          <div class="detail" v-for="log in logs">
+            <table>
+              <tr><td>クロール日時</td><td>{{log.date}}</td></tr>
+              <tr><td>最新データ日時</td><td>{{log.latestDataDate}}</td></tr>
+              <tr><td>更新件数</td><td>{{log.updated}}件</td></tr>
+            </table>
+          </div>
+        </div>
+        <div v-else>
+          クロール履歴なし
+        </div>
+      </div>
+ 
     </div>
 
     <script src="https://unpkg.com/vue"></script>

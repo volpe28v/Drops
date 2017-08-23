@@ -9,12 +9,10 @@ new Vue({
   data: {
     query: "",
     webhookUrl: "",
-    results: [],
-    detailText: "",
+    logs: [],
     reloadMsg: "",
     latestCrawlDate: "",
     latestDataDate: "",
-    enabledNotify: true,
   },
 
   computed: {
@@ -30,6 +28,12 @@ new Vue({
     var self = this;
 
     self.getWebhookData();
+
+    axios.get('/getCrawlLogs', {})
+      .then(function (response) {
+        console.log(response);
+        self.logs = response.data.logs;
+      });
   },
 
   methods: {

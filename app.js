@@ -31,6 +31,7 @@ var Drop = require("./lib/drop");
 var mongo_builder = require('./lib/mongo_builder');
 var drop_db = require("./lib/drops_db");
 var webhook_data = require("./lib/webhook_data");
+var crawl_log = require("./lib/crawl_log");
 
 Promise.all([
   mongo_builder.ready(app.get('db_name'))
@@ -38,6 +39,7 @@ Promise.all([
 .then(function(results){
   drop_db.set_db(results[0]);
   webhook_data.set_db(results[0]);
+  crawl_log.set_db(results[0]);
   startServer();
 
   startCron();
@@ -102,7 +104,7 @@ function startServer(){
         res.send({
           latestCrawlDate: result.latestCrawlDate,
           latestDataDate: result.latestDataDate,
-          updated: result.addCount 
+          updated: result.updated
         });
       });
   });
@@ -169,6 +171,12 @@ function startServer(){
     });
   }),
 
+  app.get('/getCrawlLogs', function(req, res){
+    crawl_log.find()
+      .then(function(result){
+        res.send(result);
+      });
+  }),
 
   app.listen(app.get('port'), function () {
     console.log('Drops listening on port ' + app.get('port'));
@@ -297,7 +305,7 @@ function reloadInfo(){
       })
       .then(function(result){
         alertList = result != null ? result.data : [];
-        if (alertList.length> 0){
+        if (alertList.length > 0){
           latestDataDate = alertList[0].date;
         }
 
@@ -309,19 +317,38 @@ function reloadInfo(){
 
         addCount = updatedList.length;
         if (addCount > 0){
+          console.log("add " + addCount);
           latestDataDate = updatedList[0].date;
-        }
 
-        alertList = updatedList.concat(alertList);
-        if (alertList.length > app.get('init')){
-          alertList.splice(alertList.length - addCount, addCount);
-        }
+          alertList = updatedList.concat(alertList);
+          if (alertList.length > app.get('init')){
+            alertList.splice(alertList.length - addCount, addCount);
+          }
 
-        return drop_db.save({
-          data: alertList,
-          latestDate: latestCrawlDate.toDate(),
-          latestDataDate: latestDataDate,
-        });
+          return new Promise(function(resolve,reject){
+            Promise.resolve()
+              .then(function(){
+                return drop_db.save({
+                  data: alertList,
+                  latestDate: latestCrawlDate.toDate(),
+                  latestDataDate: latestDataDate,
+                });
+              })
+              .then(function(){
+                return crawl_log.save({
+                  date: latestCrawlDate.format('YYYY/MM/DD HH:mm'),
+                  latestDataDate: latestDataDate,
+                  updated: addCount 
+                });
+              })
+              .then(function(){
+                resolve();
+              });
+          });
+        }else{
+          // 更新なしの場合は保存しない
+          return Promise.resolve();
+        }
       })
       .then(function(){
         resolve({
