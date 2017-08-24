@@ -16,7 +16,7 @@ new Vue({
     query: "",
     results: [],
     detailText: "",
-    reloadMsg: "",
+    message: "",
     latestCrawlDate: "",
     latestDataDate: "",
     enabledNotify: true,
@@ -48,8 +48,6 @@ new Vue({
 
     setInterval(function(){
       var latestSearchedDate = self.results.length > 0 ? self.results[0].date : null;
-
-      //self.silent_reload();
       self.search()
       .then(function(){
         var newestSearchedDate = self.results.length > 0 ? self.results[0].date : null;
@@ -64,10 +62,19 @@ new Vue({
   },
 
   methods: {
+    clearMessage: function(message){
+      var self = this;
+      self.message = message;
+      setTimeout(function(){
+        self.message = "";
+      }, 3000);
+    },
+
     search: function(){
       var self = this;
 
       return new Promise(function(resolve, reject){
+        self.message = "検索中...";
         self.setQueryToLocalStorage(self.query);
 
         axios.post('/search', { query: self.query })
@@ -76,6 +83,7 @@ new Vue({
             self.results = response.data.list;
             self.latestCrawlDate = response.data.latestCrawlDate;
             self.latestDataDate = response.data.latestDataDate;
+            self.clearMessage("検索しました");
             resolve();
           })
           .catch(function (error) {
@@ -104,36 +112,6 @@ new Vue({
 
       return text;
     },
-
-    reload: function(){
-      var self = this;
-      self.reloadMsg = "クロール中...";
-
-      axios.get('/reload')
-      .then(function(response){
-        console.log(response);
-        var updatedCount = response.data.updated;
-        if (updatedCount > 0){
-          self.reloadMsg = response.data.updated + "件更新されました";
-          self.search();
-        }else{
-          self.reloadMsg = "最新です";
-        }
-
-        self.latestCrawlDate = response.data.latestCrawlDate;
-        self.latestDataDate = response.data.latestDataDate;
-      });
-    },
-
-    silent_reload: function(){
-      var self = this;
-
-      axios.get('/silent_reload')
-      .then(function(response){
-        console.log(response);
-      });
-    },
-
 
     getQueryLocalstorage: function(){
       try{

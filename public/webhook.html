@@ -17,7 +17,9 @@
           <div>
             <button v-on:click="save">save</button>
             <button v-on:click="test">test</button>
+            <button v-on:click="getCrawlLogs">update logs</button>
           </div>
+          <div class="reload-msg" v-html="message"></div>
         </div>
       </div>
 

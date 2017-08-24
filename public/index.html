@@ -13,7 +13,7 @@
         <div class="left-header">
           <textarea class="query-form" v-model.lazy="query"></textarea>
           <button v-on:click="search">search</button>
-          <button v-on:click="reload">crawl</button> <span class="reload-msg" v-html="reloadMsg"></span>
+          <span class="reload-msg" v-html="message"></span>
 
           <div class="latest-crawl-date">
             最終クロール日時: <span v-html="latestCrawlDate"></span>

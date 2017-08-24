@@ -10,7 +10,7 @@ new Vue({
     query: "",
     webhookUrl: "",
     logs: [],
-    reloadMsg: "",
+    message: "",
     latestCrawlDate: "",
     latestDataDate: "",
   },
@@ -37,20 +37,45 @@ new Vue({
   },
 
   methods: {
+    clearMessage: function(message){
+      var self = this;
+      self.message = message;
+      setTimeout(function(){
+        self.message = "";
+      }, 3000);
+    },
+
     getWebhookData: function(){
       var self = this;
 
       return new Promise(function(resolve, reject){
+        self.message = "情報取得中...";
         axios.get('/getWebhookData', {})
           .then(function (response) {
             console.log(response);
             self.query = response.data.query;
             self.webhookUrl = response.data.url;
+            self.clearMessage("情報取得しました");
 
             resolve();
           })
           .catch(function (error) {
+            self.message = "情報取得に失敗しました";
             reject();
+          });
+      });
+    },
+
+    getCrawlLogs: function(){
+      var self = this;
+      return new Promise(function(resolve, reject){
+        self.message = "ログ更新中...";
+        axios.get('/getCrawlLogs', {})
+          .then(function (response) {
+            console.log(response);
+            self.logs = response.data.logs;
+            self.clearMessage("ログ更新しました");
+            resolve();
           });
       });
     },
@@ -59,12 +84,14 @@ new Vue({
       var self = this;
 
       return new Promise(function(resolve, reject){
+        self.message = "保存中...";
         axios.post('/setWebhookData', {
           query: self.query,
           url: self.webhookUrl
         })
           .then(function (response) {
             console.log(response);
+            self.clearMessage("保存しました");
             resolve();
           })
           .catch(function (error) {
@@ -77,12 +104,14 @@ new Vue({
       var self = this;
 
       return new Promise(function(resolve, reject){
+        self.message = "テスト通知中...";
         axios.post('/testWebhook', {
           query: self.query,
           url: self.webhookUrl
         })
           .then(function (response) {
             console.log(response);
+            self.clearMessage("テスト通知しました");
             resolve();
           })
           .catch(function (error) {
