@@ -20,11 +20,25 @@ new Vue({
     latestCrawlDate: "",
     latestDataDate: "",
     enabledNotify: true,
+    areas: [],
   },
 
   computed: {
+    dispResults: function(){
+      var self = this;
+      if (self.areas == null){ return self.results; }
+
+      var enabledAreas = self.areas
+        .filter(function(a){ return a.enabled;})
+        .map(function(a){ return a.name;});
+
+      return self.results.filter(function(r){
+        return ~enabledAreas.indexOf(r.area);
+      });
+    },
+
     dispCount: function(){
-      return this.results.length + "件";
+      return this.dispResults.length + "件";
     }
   },
 
@@ -84,6 +98,26 @@ new Vue({
             self.latestCrawlDate = response.data.latestCrawlDate;
             self.latestDataDate = response.data.latestDataDate;
             self.clearMessage("検索しました");
+
+            self.areas = self.results
+              .map(function(r){
+                return r.area;
+              })
+              .reduce(function(prev, current, index, array){
+                //重複を排除し重複分をカウントする
+                var found = prev.filter(function(r){ return r.name == current; })[0];
+                if (found){
+                  found.count++;
+                }else{
+                  prev.push({
+                    enabled: true,
+                    name: current,
+                    count: 1,
+                  });
+                }
+                return prev;
+              }, []);
+
             resolve();
           })
           .catch(function (error) {
