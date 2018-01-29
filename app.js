@@ -57,6 +57,7 @@ function startServer(){
     var addCount = 0;
     var latestCrawlDate = moment();
     var latestDataDate = "";
+    var oldestDataDate = "";
     Promise.resolve()
       .then(function(result){
         return Drop.getUpdatedList([], app.get('init'));
@@ -67,6 +68,7 @@ function startServer(){
         addCount = updatedList.length;
         if (addCount > 0){
           latestDataDate = updatedList[0].date;
+          oldestDataDate = updatedList[addCount-1].date;
         }
         return drop_db.save({
           data: updatedList,
@@ -77,6 +79,7 @@ function startServer(){
         res.send({
           latestCrawlDate: latestCrawlDate.format('YYYY/MM/DD HH:mm'),
           latestDataDate: latestDataDate,
+          oldestDataDate: oldestDataDate,
           updated: addCount 
         });
       });
@@ -195,6 +198,7 @@ function searchByQuery(query){
         var alertList = result != null ? result.data : [];
         var latestCrawlDate = result != null ? moment(result.latestDate): moment();
         var latestDataDate = result != null ? (result.data.length > 0 ? result.data[0].date : "") : "";
+        var oldestDataDate = result != null ? (result.data.length > 0 ? result.data[result.data.length-1].date : "") : "";
         console.log(result.latestDate);
 
         var hitList = [];
@@ -217,6 +221,7 @@ function searchByQuery(query){
         resolve({
           latestCrawlDate: latestCrawlDate.format('YYYY/MM/DD HH:mm'),
           latestDataDate: latestDataDate,
+          oldestDataDate: oldestDataDate,
           list: hitList
         });
       });

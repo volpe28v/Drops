@@ -13,7 +13,7 @@ module.exports = {
     filename: "./[name].bundle.js"
   },
 
-	plugins: [
-		new webpack.optimize.UglifyJsPlugin()
-	],
+  plugins: [
+    new webpack.optimize.UglifyJsPlugin()
+  ],
 }

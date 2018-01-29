@@ -11,7 +11,7 @@
     <div id="app">
       <div class="leftpane">
         <div class="left-header">
-          <textarea class="query-form" v-model.lazy="query"></textarea>
+          <textarea class="query-form" v-model="query" @keyup.ctrl.enter="search"></textarea>
           <button v-on:click="search">search</button>
           <span class="reload-msg" v-html="message"></span>
 
@@ -21,6 +21,11 @@
           <div class="latest-crawl-date">
             最新データ日時: <span v-html="latestDataDate"></span>
           </div>
+          <div class="latest-crawl-date">
+            最古データ日時: <span v-html="oldestDataDate"></span>
+          </div>
+
+
 
           <a target="_blank" class="detail-url" href="http://www.river.go.jp/kawabou/ipInfoList.do?gamenId=01-1301&fvrt=yes">取得元URL</a>
 

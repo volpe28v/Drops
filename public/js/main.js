@@ -19,6 +19,7 @@ new Vue({
     message: "",
     latestCrawlDate: "",
     latestDataDate: "",
+    oldestDataDate: "",
     enabledNotify: true,
     areas: [],
   },
@@ -97,6 +98,7 @@ new Vue({
             self.results = response.data.list;
             self.latestCrawlDate = response.data.latestCrawlDate;
             self.latestDataDate = response.data.latestDataDate;
+            self.oldestDataDate = response.data.oldestDataDate;
             self.clearMessage("検索しました");
 
             self.areas = self.results
