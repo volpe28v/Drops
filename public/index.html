@@ -11,26 +11,33 @@
     <div id="app">
       <div class="leftpane">
         <div class="left-header">
+          <div class="date-area">
+            <table class="latest-crawl-date">
+              <tr>
+                <td>最終検索:</td>
+                <td><span v-html="latestCrawlDate"></span></td>
+              </tr>
+              <tr>
+                <td>最新データ:</td>
+                <td><span v-html="latestDataDate"></span></td>
+              </tr>
+              <tr>
+                <td>最古データ:</td>
+                <td><span v-html="oldestDataDate"></span></td>
+              </tr>
+            </table>
+            <a target="_blank" class="latest-crawl-date original-site" href="http://www.river.go.jp/kawabou/ipInfoList.do?gamenId=01-1301&fvrt=yes">取得元サイトへ</a>
+          </div>
+
+
           <textarea class="query-form" v-model="query" @keyup.ctrl.enter="search"></textarea>
-          <button v-on:click="search">search</button>
+          <button class="search-button" v-on:click="search">検索する</button>
           <span class="reload-msg" v-html="message"></span>
 
-          <div class="latest-crawl-date">
-            最終クロール日時: <span v-html="latestCrawlDate"></span>
-          </div>
-          <div class="latest-crawl-date">
-            最新データ日時: <span v-html="latestDataDate"></span>
-          </div>
-          <div class="latest-crawl-date">
-            最古データ日時: <span v-html="oldestDataDate"></span>
-          </div>
 
 
 
-          <a target="_blank" class="detail-url" href="http://www.river.go.jp/kawabou/ipInfoList.do?gamenId=01-1301&fvrt=yes">取得元URL</a>
-
-
-          <div>
+          <div class="notification">
             <input type="checkbox" id="notification" v-model="enabledNotify">
             <label for="notification">更新通知</label>
           </div>
@@ -40,7 +47,9 @@
           <div>
             <div v-for="area in areas">
               <input type="checkbox" v-model="area.enabled">
-              <label>{{area.name}} ({{area.count}})</label>
+              <label>
+                <span v-text="area.name"></span> (<span v-text="area.count"></span>)
+              </label>
             </div>
           </div>
 
