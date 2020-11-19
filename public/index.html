@@ -26,16 +26,12 @@
                 <td><span v-html="oldestDataDate"></span></td>
               </tr>
             </table>
-            <a target="_blank" class="latest-crawl-date original-site" href="http://www.river.go.jp/kawabou/ipInfoList.do?gamenId=01-1301&fvrt=yes">取得元サイトへ</a>
+            <a target="_blank" class="latest-crawl-date original-site" href="https://www.river.go.jp/kawabou/html/notice/ipInfoList_ifc2_ac0.html">取得元サイトへ</a>
           </div>
-
 
           <textarea class="query-form" v-model="query" @keyup.ctrl.enter="search"></textarea>
           <button class="search-button" v-on:click="search">検索する</button>
           <span class="reload-msg" v-html="message"></span>
-
-
-
 
           <div class="notification">
             <input type="checkbox" id="notification" v-model="enabledNotify">

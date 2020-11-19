@@ -80,7 +80,7 @@ function startServer(){
           latestCrawlDate: latestCrawlDate.format('YYYY/MM/DD HH:mm'),
           latestDataDate: latestDataDate,
           oldestDataDate: oldestDataDate,
-          updated: addCount 
+          updated: addCount
         });
       });
   });
@@ -135,7 +135,7 @@ function startServer(){
         }else{
           res.send({
             query: "",
-            url: "" 
+            url: ""
           });
         }
       });
@@ -151,7 +151,7 @@ function startServer(){
 
   app.post('/testWebhook', function(req, res){
     console.log(req.body);
-    
+
     var url = req.body.url;
     var query = req.body.query;
     var options = {
@@ -199,7 +199,7 @@ function searchByQuery(query){
         var latestCrawlDate = result != null ? moment(result.latestDate): moment();
         var latestDataDate = result != null ? (result.data.length > 0 ? result.data[0].date : "") : "";
         var oldestDataDate = result != null ? (result.data.length > 0 ? result.data[result.data.length-1].date : "") : "";
-        console.log(result.latestDate);
+        console.log(latestDataDate);
 
         var hitList = [];
         if (queries.length == 1 && queries[0] == ""){
