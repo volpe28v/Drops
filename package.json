@@ -14,7 +14,7 @@
     "mongodb": "^2.2.30"
   },
   "devDependencies": {
-    "webpack": "^2.2.1"
+    "webpack": "^5.74.0"
   },
   "scripts": {
     "start": "node app.js",
