@@ -9,7 +9,7 @@
     "cheerio-httpcli": "^0.7.0",
     "commander": "^2.11.0",
     "cron": "^1.2.1",
-    "express": "^4.15.3",
+    "express": "^4.17.3",
     "moment": "^2.18.1",
     "mongodb": "^2.2.30"
   },
